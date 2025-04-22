@@ -1,16 +1,12 @@
 package com.example.oniongarlicrun
+
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import android.util.Log
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import android.content.Context
+import com.example.oniongarlicrun.logic.GameLogic
+import com.example.oniongarlicrun.utils.Smanager
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,61 +16,49 @@ class MainActivity : AppCompatActivity() {
     private lateinit var heart1: ImageView
     private lateinit var heart2: ImageView
     private lateinit var heart3: ImageView
-    private var lives = 3
-    private var lane = 1
+    private lateinit var gameLogic: GameLogic
+
     private val numRows = 6
     private val numCols = 3
-    private var dropDelay = 500L
-    private var bombsSpawned = 0
-    private var isGameOver = false
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // אתחול מנהל אותות
+        Smanager.init(applicationContext)
+
         findViews()
         setupGrid()
-        initViews()
+
+        gameLogic = GameLogic(
+            context = this,
+            cellMatrix = cellMatrix,
+            onEggplantDraw = { lane -> drawEggplantAtLane(lane) },
+            onHeartUpdate = { updateHearts(it) }
+        )
+
+        gameLogic.drawEggplantInitial()
         startDropBombs()
+        initControls()
     }
-    private fun findViews(){
+
+    private fun findViews() {
         bLeft = findViewById(R.id.bLeft)
         bRight = findViewById(R.id.bRight)
         heart1 = findViewById(R.id.heart1)
         heart2 = findViewById(R.id.heart2)
         heart3 = findViewById(R.id.heart3)
     }
-    private fun initViews() {
-        bLeft.setOnClickListener { if (lane > 0) { lane--
-            drawEggplant() }
-        }
-        bRight.setOnClickListener { if (lane < 2) { lane++
-            drawEggplant() }
-        }
-        drawEggplant()
-    }
 
-    private fun spawnBomb() {
-        val col = (0..2).random()
-        val type = when ((0..2).random()) {
-            0 -> R.drawable.garlic
-            1 -> R.drawable.purpleonion
-            else -> R.drawable.whiteonion
+    private fun initControls() {
+        bLeft.setOnClickListener {
+            gameLogic.moveLeft()
         }
-
-        dropBomb(col, type)
-
-        bombsSpawned++
-        if (bombsSpawned % 15 == 0) {
-            dropDelay = (dropDelay / 1.2).toLong().coerceAtLeast(100L)
-            Log.d("GameSpeed", "⬆️ Drop speed increased! New delay: $dropDelay ms")
+        bRight.setOnClickListener {
+            gameLogic.moveRight()
         }
     }
-
-
-
 
     private fun setupGrid() {
         val gridLayout = findViewById<GridLayout>(R.id.grid)
@@ -97,19 +81,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun drawEggplant() {
+    private fun drawEggplantAtLane(lane: Int) {
         for (i in 0 until numCols) {
             cellMatrix[numRows - 1][i].setImageDrawable(null)
         }
-
         cellMatrix[numRows - 1][lane].setImageResource(R.drawable.eggplant)
+    }
 
+    private fun updateHearts(lives: Int) {
+        when (lives) {
+            2 -> heart3.setImageDrawable(null)
+            1 -> heart2.setImageDrawable(null)
+            0 -> heart1.setImageDrawable(null)
+        }
     }
 
     private fun startDropBombs() {
-        object : CountDownTimer(Long.MAX_VALUE, 2000) {
+        object : android.os.CountDownTimer(Long.MAX_VALUE, 2000) {
             override fun onTick(millisUntilFinished: Long) {
-                spawnBomb()
+                if (!gameLogic.isGameOver) {
+                    gameLogic.spawnBomb()
+                }
             }
 
             override fun onFinish() {
@@ -117,60 +109,4 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
     }
-
-
-    private fun dropBomb(col: Int, drawableId: Int) {
-        var currentRow = 0
-        val delay: Long = dropDelay
-
-        object : CountDownTimer(delay * numRows, delay) {
-            override fun onTick(millisUntilFinished: Long) {
-                val row = currentRow
-
-                if (row > 0 && row - 1 != numRows - 1) {
-                    cellMatrix[row - 1][col].setImageDrawable(null)
-                }
-
-
-                if (row == numRows) return
-
-
-                if (row != numRows - 1 || col != lane) {
-
-                    cellMatrix[row][col].setImageResource(drawableId)
-                }
-
-
-                if (row == numRows - 1 && col == lane && !isGameOver) {
-                    Log.d("GameDebug", "💥 Hazil got hit!")
-                    loseLife()
-                }
-
-
-                currentRow++
-            }
-
-            override fun onFinish() {
-                if (currentRow == numRows && col != lane) {
-                    cellMatrix[numRows - 1][col].setImageDrawable(null)
-                }
-            }
-        }.start()
-    }
-
-
-    private fun loseLife() {
-        lives--
-        when (lives) {
-            2 -> heart3.setImageDrawable(null)
-            1 -> heart2.setImageDrawable(null)
-            0 -> {
-                heart1.setImageDrawable(null)
-                Toast.makeText(this, " :( Game Over!", Toast.LENGTH_LONG).show()
-                isGameOver = true
-            }
-        }
-    }
-
-
 }
