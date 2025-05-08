@@ -1,11 +1,11 @@
-package com.example.oniongarlicrun.logic
+package com.example.oniongarlicrun
 
 import android.content.Context
 import android.os.CountDownTimer
 import android.util.Log
 import android.widget.ImageView
-import com.example.oniongarlicrun.R
 import com.example.oniongarlicrun.utils.Smanager
+
 
 class GameLogic(
     private val context: Context,
@@ -14,14 +14,11 @@ class GameLogic(
     private val onHeartUpdate: (lives: Int) -> Unit
 ) {
     private val numRows = cellMatrix.size
-    private val numCols = cellMatrix[0].size
 
     private var lane = 1
     private var lives = 3
     private var dropDelay = 500L
     private var bombsSpawned = 0
-    var isGameOver = false
-        private set
 
     fun moveLeft() {
         if (lane > 0) {
@@ -69,15 +66,22 @@ class GameLogic(
                     cellMatrix[row - 1][col].setImageDrawable(null)
                 }
 
-                if (row == numRows) return
+                if (row == numRows) {
+                    cellMatrix[row - 1][col].setImageDrawable(null)
+                    cellMatrix[row -1][col].tag = null
+                    return
+                }
 
                 if (row != numRows - 1 || col != lane) {
                     cellMatrix[row][col].setImageResource(drawableId)
                 }
 
-                if (row == numRows - 1 && col == lane && !isGameOver) {
+                if (row == numRows - 1 && col == lane) {
                     Log.d("GameDebug", "💥 Eggplant got hit!")
                     loseLife()
+                    Smanager.getInstance().toast("Eggplant got hit!")
+
+
                 }
 
                 currentRow++
@@ -96,7 +100,6 @@ class GameLogic(
         onHeartUpdate(lives)
 
         if (lives == 0) {
-            isGameOver = true
             Smanager.getInstance().toast("☠️ Game Over!")
             Smanager.getInstance().vibrate()
         }

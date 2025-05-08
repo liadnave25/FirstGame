@@ -5,7 +5,6 @@ import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.oniongarlicrun.logic.GameLogic
 import com.example.oniongarlicrun.utils.Smanager
 
 class MainActivity : AppCompatActivity() {
@@ -24,8 +23,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        // אתחול מנהל אותות
+        
         Smanager.init(applicationContext)
 
         findViews()
@@ -99,9 +97,7 @@ class MainActivity : AppCompatActivity() {
     private fun startDropBombs() {
         object : android.os.CountDownTimer(Long.MAX_VALUE, 2000) {
             override fun onTick(millisUntilFinished: Long) {
-                if (!gameLogic.isGameOver) {
                     gameLogic.spawnBomb()
-                }
             }
 
             override fun onFinish() {
