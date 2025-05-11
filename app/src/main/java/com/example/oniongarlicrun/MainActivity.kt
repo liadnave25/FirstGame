@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.oniongarlicrun.utils.Smanager
 
@@ -15,29 +16,47 @@ class MainActivity : AppCompatActivity() {
     private lateinit var heart1: ImageView
     private lateinit var heart2: ImageView
     private lateinit var heart3: ImageView
+    private lateinit var metersTextView: TextView
+    private lateinit var coinTextView: TextView
     private lateinit var gameLogic: GameLogic
 
-    private val numRows = 6
-    private val numCols = 3
+    private val numRows = 12
+    private val numCols = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        
-        Smanager.init(applicationContext)
 
+        Smanager.init(applicationContext)
         findViews()
         setupGrid()
+        val mode = intent.getStringExtra("MODE") ?: "slow"
+        val baseDropDelay = when (mode) {
+            "fast" -> 500L
+            "sensor" -> 700L
+            else -> 1000L
+        }
+
+        val spawnInterval = when (mode) {
+            "fast" -> 900L
+            "sensor" -> 1200L
+            else -> 1600L
+        }
 
         gameLogic = GameLogic(
             context = this,
             cellMatrix = cellMatrix,
-            onEggplantDraw = { lane -> drawEggplantAtLane(lane) },
-            onHeartUpdate = { updateHearts(it) }
+            onEggplantDraw = { drawEggplantAtLane(it) },
+            onHeartUpdate = { updateHearts(it) },
+            dropDelay = baseDropDelay,
+            onMeterUpdate = { meters -> metersTextView.text = "Meters Passed: $meters" },
+            onCoinUpdate = { coins -> coinTextView.text = "Coins: $coins" }
+
         )
 
         gameLogic.drawEggplantInitial()
-        startDropBombs()
+        gameLogic.startMeterCounter()
+        startDropBombs(spawnInterval)
         initControls()
     }
 
@@ -47,15 +66,14 @@ class MainActivity : AppCompatActivity() {
         heart1 = findViewById(R.id.heart1)
         heart2 = findViewById(R.id.heart2)
         heart3 = findViewById(R.id.heart3)
+        metersTextView = findViewById(R.id.metersTextView)
+        coinTextView = findViewById(R.id.coinsTextView)
+
     }
 
     private fun initControls() {
-        bLeft.setOnClickListener {
-            gameLogic.moveLeft()
-        }
-        bRight.setOnClickListener {
-            gameLogic.moveRight()
-        }
+        bLeft.setOnClickListener { gameLogic.moveLeft() }
+        bRight.setOnClickListener { gameLogic.moveRight() }
     }
 
     private fun setupGrid() {
@@ -94,14 +112,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startDropBombs() {
-        object : android.os.CountDownTimer(Long.MAX_VALUE, 2000) {
+    private fun startDropBombs(spawnInterval: Long) {
+        object : android.os.CountDownTimer(Long.MAX_VALUE, spawnInterval) {
+            var isFirst = true
             override fun onTick(millisUntilFinished: Long) {
-                    gameLogic.spawnBomb()
+                if (isFirst) {
+                    isFirst = false
+                    return
+                }
+                gameLogic.spawnBomb()
             }
 
             override fun onFinish() {
-                startDropBombs()
+                startDropBombs(spawnInterval)
             }
         }.start()
     }
