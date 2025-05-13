@@ -1,5 +1,4 @@
 package com.example.oniongarlicrun
-
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -31,5 +30,7 @@ class StartApp : AppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("MODE", mode)
         startActivity(intent)
+        finish()
+
     }
 }

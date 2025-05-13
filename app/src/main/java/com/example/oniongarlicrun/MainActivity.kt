@@ -1,5 +1,4 @@
 package com.example.oniongarlicrun
-
 import android.os.Bundle
 import android.widget.GridLayout
 import android.widget.ImageButton
@@ -7,6 +6,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.oniongarlicrun.utils.Smanager
+import android.app.AlertDialog
+import android.content.Intent
+import android.widget.EditText
+import com.example.oniongarlicrun.HighScore
+import com.example.oniongarlicrun.utils.ScoreManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -50,9 +54,15 @@ class MainActivity : AppCompatActivity() {
             onHeartUpdate = { updateHearts(it) },
             dropDelay = baseDropDelay,
             onMeterUpdate = { meters -> metersTextView.text = "Meters Passed: $meters" },
-            onCoinUpdate = { coins -> coinTextView.text = "Coins: $coins" }
-
+            onCoinUpdate = { coins -> coinTextView.text = "Coins: $coins" },
+            onGameOver = {
+                val meters = metersTextView.text.toString().substringAfter(": ").toInt()
+                val coins = coinTextView.text.toString().substringAfter(": ").toInt()
+                val totalScore = meters + coins
+                runOnUiThread { showNameDialog(totalScore) }
+            }
         )
+
 
         gameLogic.drawEggplantInitial()
         gameLogic.startMeterCounter()
@@ -127,5 +137,28 @@ class MainActivity : AppCompatActivity() {
                 startDropBombs(spawnInterval)
             }
         }.start()
+    }
+
+    fun showNameDialog(finalScore: Int) {
+        val editText = EditText(this)
+        editText.hint = "Your name"
+
+        AlertDialog.Builder(this)
+            .setTitle("☠️ Game Over!")
+            .setMessage("Enter your name for the records")
+            .setView(editText)
+            .setCancelable(false)
+            .setPositiveButton("Submit") { _, _ ->
+                val name = editText.text.toString().ifBlank { "Anonymous" }
+                val lat = 32.115139
+                val lon = 34.817804
+
+                val newHighScore = HighScore(name, finalScore, lat, lon)
+                ScoreManager.tryInsert(this, newHighScore)
+
+                startActivity(Intent(this, RecordActivity::class.java))
+                finish()
+            }
+            .show()
     }
 }

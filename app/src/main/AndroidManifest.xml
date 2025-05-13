@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.oniongarlicrun">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -14,16 +15,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.OnionGarlicRun"
         tools:targetApi="31">
-        <activity
-            android:name=".StartApp"
-            android:exported="true">
 
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="......" />
+
+        <activity android:name=".FirstScreen"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".StartApp" />
         <activity android:name=".MainActivity" />
+        <activity android:name=".RecordActivity" />
+        <activity android:name=".MapActivity" />
     </application>
-    <uses-permission android:name="android.permission.VIBRATE" />
 </manifest>

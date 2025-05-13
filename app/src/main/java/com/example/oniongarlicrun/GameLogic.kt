@@ -2,7 +2,6 @@ package com.example.oniongarlicrun
 
 import android.content.Context
 import android.os.CountDownTimer
-import android.util.Log
 import android.widget.ImageView
 import com.example.oniongarlicrun.utils.Smanager
 
@@ -13,7 +12,8 @@ class GameLogic(
     private val onHeartUpdate: (lives: Int) -> Unit,
     private var dropDelay: Long,
     private val onMeterUpdate: (meters: Int) -> Unit,
-    private val onCoinUpdate: (coins: Int) -> Unit
+    private val onCoinUpdate: (coins: Int) -> Unit,
+    private val onGameOver: () -> Unit
 ) {
     private val numRows = cellMatrix.size
     private val numCols = cellMatrix[0].size
@@ -26,6 +26,8 @@ class GameLogic(
     private var isGameOver = false
 
     private var meterTimer: CountDownTimer? = null
+
+    fun isGameOver(): Boolean = isGameOver
 
     fun startMeterCounter() {
         meterTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
@@ -76,7 +78,9 @@ class GameLogic(
     }
 
     fun spawnBomb() {
-        val isCoin = (0..4).random() == 0 // 20% סיכוי למטבע
+        if (isGameOver) return
+
+        val isCoin = (0..4).random() == 0
         if (isCoin) {
             spawnCoin()
             return
@@ -103,7 +107,7 @@ class GameLogic(
 
         object : CountDownTimer(dropDelay * numRows, dropDelay) {
             override fun onTick(millisUntilFinished: Long) {
-                if (hit) return
+                if (hit || isGameOver) return
 
                 val row = currentRow
 
@@ -150,6 +154,8 @@ class GameLogic(
 
         object : CountDownTimer(dropDelay * numRows, dropDelay) {
             override fun onTick(millisUntilFinished: Long) {
+                if (isGameOver) return
+
                 val row = currentRow
 
                 if (row > 0 && row - 1 != numRows - 1) {
@@ -199,6 +205,7 @@ class GameLogic(
             meterTimer?.cancel()
             Smanager.getInstance().toast("☠️ Game Over!")
             Smanager.getInstance().vibrate()
+            onGameOver()
         }
     }
 }
