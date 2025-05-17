@@ -39,7 +39,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    // התנהגות של כפתור חזור ← מסיים את הפעילות
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true

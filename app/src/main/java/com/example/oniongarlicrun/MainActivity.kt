@@ -1,5 +1,7 @@
 package com.example.oniongarlicrun
+
 import android.os.Bundle
+import android.view.View
 import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -11,6 +13,8 @@ import android.content.Intent
 import android.widget.EditText
 import com.example.oniongarlicrun.HighScore
 import com.example.oniongarlicrun.utils.ScoreManager
+import com.example.oniongarlicrun.utils.TiltDetector
+import com.example.oniongarlicrun.utils.TiltCallback
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,8 +27,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var metersTextView: TextView
     private lateinit var coinTextView: TextView
     private lateinit var gameLogic: GameLogic
+    private var currentSpawnInterval: Long = 0L
+    private var bombTimer: android.os.CountDownTimer? = null
+    private var lastSpeedUpMeterMark: Int = 0
 
-    private val numRows = 12
+    private lateinit var tiltDetector: TiltDetector
+    private var sensorModeEnabled = false
+
+    private val numRows = 8
     private val numCols = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +44,10 @@ class MainActivity : AppCompatActivity() {
         Smanager.init(applicationContext)
         findViews()
         setupGrid()
+
         val mode = intent.getStringExtra("MODE") ?: "slow"
+        sensorModeEnabled = (mode == "sensor")
+
         val baseDropDelay = when (mode) {
             "fast" -> 500L
             "sensor" -> 700L
@@ -44,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         val spawnInterval = when (mode) {
             "fast" -> 900L
             "sensor" -> 1200L
-            else -> 1600L
+            else -> 1300L
         }
 
         gameLogic = GameLogic(
@@ -53,7 +66,14 @@ class MainActivity : AppCompatActivity() {
             onEggplantDraw = { drawEggplantAtLane(it) },
             onHeartUpdate = { updateHearts(it) },
             dropDelay = baseDropDelay,
-            onMeterUpdate = { meters -> metersTextView.text = "Meters Passed: $meters" },
+            onMeterUpdate = { meters ->
+                metersTextView.text = "Meters Passed: $meters"
+                if (meters - lastSpeedUpMeterMark >= 45) {
+                    lastSpeedUpMeterMark = meters
+                    currentSpawnInterval = (currentSpawnInterval / 1.2).toLong().coerceAtLeast(200L)
+                    restartBombTimer()
+                }
+            },
             onCoinUpdate = { coins -> coinTextView.text = "Coins: $coins" },
             onGameOver = {
                 val meters = metersTextView.text.toString().substringAfter(": ").toInt()
@@ -63,6 +83,9 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
+        if (sensorModeEnabled) {
+            initTiltControl()
+        }
 
         gameLogic.drawEggplantInitial()
         gameLogic.startMeterCounter()
@@ -78,12 +101,16 @@ class MainActivity : AppCompatActivity() {
         heart3 = findViewById(R.id.heart3)
         metersTextView = findViewById(R.id.metersTextView)
         coinTextView = findViewById(R.id.coinsTextView)
-
     }
 
     private fun initControls() {
-        bLeft.setOnClickListener { gameLogic.moveLeft() }
-        bRight.setOnClickListener { gameLogic.moveRight() }
+        if (!sensorModeEnabled) {
+            bLeft.setOnClickListener { gameLogic.moveLeft() }
+            bRight.setOnClickListener { gameLogic.moveRight() }
+        } else {
+            bLeft.visibility = View.GONE
+            bRight.visibility = View.GONE
+        }
     }
 
     private fun setupGrid() {
@@ -122,8 +149,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startDropBombs(spawnInterval: Long) {
-        object : android.os.CountDownTimer(Long.MAX_VALUE, spawnInterval) {
+    private fun startDropBombs(initialInterval: Long) {
+        currentSpawnInterval = initialInterval
+        restartBombTimer()
+    }
+
+    private fun restartBombTimer() {
+        bombTimer?.cancel()
+
+        bombTimer = object : android.os.CountDownTimer(Long.MAX_VALUE, currentSpawnInterval) {
             var isFirst = true
             override fun onTick(millisUntilFinished: Long) {
                 if (isFirst) {
@@ -134,9 +168,37 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
-                startDropBombs(spawnInterval)
+                restartBombTimer()
             }
         }.start()
+    }
+
+    private fun initTiltControl() {
+        tiltDetector = TiltDetector(
+            context = this,
+            tiltCallback = object : TiltCallback {
+                override fun tiltX() {
+                    if (tiltDetector.tiltCounterX > 0) {
+                        gameLogic.moveRight()
+                    } else {
+                        gameLogic.moveLeft()
+                    }
+                }
+
+                override fun tiltY() {
+                }
+            }
+        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (sensorModeEnabled) tiltDetector.start()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (sensorModeEnabled) tiltDetector.stop()
     }
 
     fun showNameDialog(finalScore: Int) {
@@ -150,13 +212,13 @@ class MainActivity : AppCompatActivity() {
             .setCancelable(false)
             .setPositiveButton("Submit") { _, _ ->
                 val name = editText.text.toString().ifBlank { "Anonymous" }
-                val lat = 32.115139
-                val lon = 34.817804
+                val currentLat = FirstScreen.lat
+                val currentLon = FirstScreen.lon
 
-                val newHighScore = HighScore(name, finalScore, lat, lon)
+                val newHighScore = HighScore(name, finalScore, currentLat, currentLon)
                 ScoreManager.tryInsert(this, newHighScore)
 
-                startActivity(Intent(this, RecordActivity::class.java))
+                startActivity(Intent(this, RecordsActivityV2::class.java))
                 finish()
             }
             .show()

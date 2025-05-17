@@ -1,5 +1,4 @@
 package com.example.oniongarlicrun.utils
-
 import android.content.Context
 import com.example.oniongarlicrun.HighScore
 import com.google.gson.Gson

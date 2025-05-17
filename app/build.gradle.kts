@@ -38,6 +38,7 @@ android {
 dependencies {
     implementation("com.google.code.gson:gson:2.10")
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

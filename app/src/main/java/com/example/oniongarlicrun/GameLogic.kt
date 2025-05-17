@@ -1,5 +1,4 @@
 package com.example.oniongarlicrun
-
 import android.content.Context
 import android.os.CountDownTimer
 import android.widget.ImageView
