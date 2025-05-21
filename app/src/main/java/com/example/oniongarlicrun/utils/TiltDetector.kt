@@ -47,8 +47,11 @@ class TiltDetector(context: Context, private var tiltCallback: TiltCallback?) {
                 tiltCallback?.tiltX()
             }
 
-            if (abs(y) >= 3.0) {
-                tiltCounterY++
+            if (y <= -3.0) {
+                tiltCounterY = -1
+                tiltCallback?.tiltY()
+            } else if (y >= 3.0) {
+                tiltCounterY = 1
                 tiltCallback?.tiltY()
             }
         }

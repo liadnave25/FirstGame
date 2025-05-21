@@ -1,6 +1,7 @@
 package com.example.oniongarlicrun
 import android.content.Context
 import android.os.CountDownTimer
+import android.util.Log
 import android.widget.ImageView
 import com.example.oniongarlicrun.utils.Smanager
 
@@ -12,18 +13,17 @@ class GameLogic(
     private var dropDelay: Long,
     private val onMeterUpdate: (meters: Int) -> Unit,
     private val onCoinUpdate: (coins: Int) -> Unit,
-    private val onGameOver: () -> Unit
+    private val onGameOver: () -> Unit,
+    private val onSound: (soundResId: Int) -> Unit
 ) {
     private val numRows = cellMatrix.size
     private val numCols = cellMatrix[0].size
-
     private var lane = numCols / 2
     private var lives = 3
     private var bombsSpawned = 0
     private var metersPassed = 0
     private var coinsCollected = 0
     private var isGameOver = false
-
     private var meterTimer: CountDownTimer? = null
 
     fun isGameOver(): Boolean = isGameOver
@@ -61,12 +61,14 @@ class GameLogic(
         if (tag == "bomb") {
             loseLife()
             Smanager.getInstance().toast("Eggplant ran into a bomb!")
+            onSound(R.raw.boom)
             cellMatrix[numRows - 1][lane].setImageDrawable(null)
             cellMatrix[numRows - 1][lane].tag = null
         } else if (tag == "coin") {
             coinsCollected++
             onCoinUpdate(coinsCollected)
             Smanager.getInstance().toast("💰 Got a coin!")
+            onSound(R.raw.coin)
             cellMatrix[numRows - 1][lane].setImageDrawable(null)
             cellMatrix[numRows - 1][lane].tag = null
         }
@@ -126,6 +128,7 @@ class GameLogic(
                 if (row == numRows - 1 && col == lane) {
                     loseLife()
                     Smanager.getInstance().toast("Eggplant got hit!")
+                    onSound(R.raw.boom)
                     onEggplantDraw(lane)
                     hit = true
                     return
@@ -174,6 +177,7 @@ class GameLogic(
                     coinsCollected++
                     onCoinUpdate(coinsCollected)
                     Smanager.getInstance().toast("💰 Got a coin!")
+                    onSound(R.raw.coin)
                     cellMatrix[row][col].setImageDrawable(null)
                     cellMatrix[row][col].tag = null
                     onEggplantDraw(lane)
@@ -207,4 +211,14 @@ class GameLogic(
             onGameOver()
         }
     }
+
+    fun adjustDropDelay(faster: Boolean) {
+        if (isGameOver) return
+        val factor = if (faster) 0.9 else 1.1
+        dropDelay = (dropDelay * factor).toLong()
+            .coerceIn(300L, 1300L)
+        Log.d("DROP_DELAY", "dropDelay = $dropDelay ms")
+    }
+
+
 }

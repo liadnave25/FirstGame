@@ -10,11 +10,14 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.oniongarlicrun.utils.Smanager
 import android.app.AlertDialog
 import android.content.Intent
+import android.util.Log
 import android.widget.EditText
 import com.example.oniongarlicrun.HighScore
 import com.example.oniongarlicrun.utils.ScoreManager
 import com.example.oniongarlicrun.utils.TiltDetector
 import com.example.oniongarlicrun.utils.TiltCallback
+import com.example.oniongarlicrun.utils.Sounds
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private var currentSpawnInterval: Long = 0L
     private var bombTimer: android.os.CountDownTimer? = null
     private var lastSpeedUpMeterMark: Int = 0
+    private lateinit var sounds: Sounds
 
     private lateinit var tiltDetector: TiltDetector
     private var sensorModeEnabled = false
@@ -44,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         Smanager.init(applicationContext)
         findViews()
         setupGrid()
+        sounds = Sounds(this)
 
         val mode = intent.getStringExtra("MODE") ?: "slow"
         sensorModeEnabled = (mode == "sensor")
@@ -55,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val spawnInterval = when (mode) {
-            "fast" -> 900L
+            "fast" -> 750L
             "sensor" -> 1200L
             else -> 1300L
         }
@@ -80,7 +85,8 @@ class MainActivity : AppCompatActivity() {
                 val coins = coinTextView.text.toString().substringAfter(": ").toInt()
                 val totalScore = meters + coins
                 runOnUiThread { showNameDialog(totalScore) }
-            }
+            },
+            onSound = { soundResId -> sounds.playSound(soundResId)}
         )
 
         if (sensorModeEnabled) {
@@ -136,10 +142,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun drawEggplantAtLane(lane: Int) {
         for (i in 0 until numCols) {
-            cellMatrix[numRows - 1][i].setImageDrawable(null)
+            val imageView = cellMatrix[numRows - 1][i]
+            imageView.setImageDrawable(null)
+            imageView.scaleX = 1.0f
+            imageView.scaleY = 1.0f
         }
-        cellMatrix[numRows - 1][lane].setImageResource(R.drawable.eggplant)
+        val imageView = cellMatrix[numRows - 1][lane]
+        imageView.setImageResource(R.drawable.eggplant)
+        imageView.scaleX = 2.0f
+        imageView.scaleY = 2.0f
+
     }
+
 
     private fun updateHearts(lives: Int) {
         when (lives) {
@@ -186,6 +200,13 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun tiltY() {
+                    if (tiltDetector.tiltCounterY < 0) {
+                        Log.d("TILT_Y", "faster")
+                        gameLogic.adjustDropDelay(faster = true)
+                    } else if (tiltDetector.tiltCounterY > 0) {
+                        Log.d("TILT_Y", "slower")
+                        gameLogic.adjustDropDelay(faster = false)
+                    }
                 }
             }
         )

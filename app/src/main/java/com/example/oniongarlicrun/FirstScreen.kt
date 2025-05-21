@@ -70,7 +70,7 @@ class FirstScreen : AppCompatActivity() {
             location?.let {
                 lat = it.latitude
                 lon = it.longitude
-                Toast.makeText(this, "Location received", Toast.LENGTH_SHORT).show()
+                android.util.Log.d("LOCATION_DEBUG", "Location received: lat=$lat, lon=$lon")
             }
         }
     }
