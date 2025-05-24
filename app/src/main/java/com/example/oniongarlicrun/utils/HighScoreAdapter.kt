@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.oniongarlicrun.HighScore
 import com.example.oniongarlicrun.R
+import androidx.core.graphics.toColorInt
 
 class HighScoreAdapter(
     private val scores: List<HighScore>,
@@ -35,7 +36,7 @@ class HighScoreAdapter(
 
         // Highlight selected
         holder.itemView.setBackgroundColor(
-            if (position == selectedPosition) Color.parseColor("#D0F0C0")
+            if (position == selectedPosition) "#D0F0C0".toColorInt()
             else Color.TRANSPARENT
         )
 

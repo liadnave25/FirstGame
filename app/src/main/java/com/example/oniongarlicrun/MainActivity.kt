@@ -12,7 +12,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.util.Log
 import android.widget.EditText
-import com.example.oniongarlicrun.HighScore
 import com.example.oniongarlicrun.utils.ScoreManager
 import com.example.oniongarlicrun.utils.TiltDetector
 import com.example.oniongarlicrun.utils.TiltCallback

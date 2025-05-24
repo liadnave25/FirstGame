@@ -20,7 +20,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="....." />
+            android:value="........." />
 
         <activity android:name=".FirstScreen"
             android:exported="true">
@@ -32,6 +32,5 @@
         <activity android:name=".RecordsActivityV2" />
         <activity android:name=".StartApp" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".MapActivity" />
     </application>
 </manifest>

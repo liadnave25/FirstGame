@@ -134,8 +134,11 @@ class GameLogic(
                     return
                 }
 
-                cellMatrix[row][col].setImageResource(drawableId)
-                cellMatrix[row][col].tag = "bomb"
+                if (cellMatrix[row][col].tag == null) {
+                    cellMatrix[row][col].setImageResource(drawableId)
+                    cellMatrix[row][col].tag = "bomb"
+                }
+
 
                 currentRow++
             }

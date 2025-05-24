@@ -5,7 +5,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import com.example.oniongarlicrun.utils.TiltCallback
 import kotlin.math.abs
 
 class TiltDetector(context: Context, private var tiltCallback: TiltCallback?) {
@@ -29,7 +28,7 @@ class TiltDetector(context: Context, private var tiltCallback: TiltCallback?) {
     private fun initEventListener() {
         sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                val x = event.values[0]
+                val x = -event.values[0]
                 val y = event.values[1]
                 calculateTilt(x, y)
             }

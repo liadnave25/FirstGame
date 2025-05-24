@@ -12,7 +12,7 @@ class Sounds(context: Context) {
         executor.execute {
             val mediaPlayer = MediaPlayer.create(context, resId)
             mediaPlayer.isLooping = false
-            mediaPlayer.setVolume(1.0f, 1.0f)
+            mediaPlayer.setVolume(0.5f, 0.5f)
             mediaPlayer.start()
             mediaPlayer.setOnCompletionListener { mp ->
                 mp?.stop()

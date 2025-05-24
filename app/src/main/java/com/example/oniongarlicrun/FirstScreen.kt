@@ -1,5 +1,4 @@
 package com.example.oniongarlicrun
-import com.example.oniongarlicrun.RecordsActivityV2
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -19,7 +18,7 @@ class FirstScreen : AppCompatActivity() {
         var lon: Double = 34.817804
     }
 
-    private val LOCATION_PERMISSION_REQUEST_CODE = 1002
+    private val locationcode = 1002
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +51,7 @@ class FirstScreen : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                LOCATION_PERMISSION_REQUEST_CODE
+                locationcode
             )
         }
     }
@@ -81,7 +80,7 @@ class FirstScreen : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+        if (requestCode == locationcode) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getLastLocationSafely()
                 Toast.makeText(this, "Location permission granted", Toast.LENGTH_SHORT).show()
