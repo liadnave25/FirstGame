@@ -33,11 +33,11 @@ class Smanager private constructor(context: Context) {
 
     fun vibrate(duration: Long = 500) {
         contextRef.get()?.let { context ->
-            val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-
-            vibrator.vibrate(
+            val vibrator = context.getSystemService(Vibrator::class.java)
+            vibrator?.vibrate(
                 VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE)
             )
         }
     }
+
 }

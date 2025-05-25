@@ -41,10 +41,17 @@ class HighScoreAdapter(
         )
 
         holder.btnMap.setOnClickListener {
+            val previousSelected = selectedPosition
             selectedPosition = holder.adapterPosition
-            notifyDataSetChanged()
+
+            if (previousSelected != RecyclerView.NO_POSITION) {
+                notifyItemChanged(previousSelected)
+            }
+            notifyItemChanged(selectedPosition)
+
             onMapClick(score.lat, score.lon)
         }
+
     }
 
     override fun getItemCount(): Int = scores.size

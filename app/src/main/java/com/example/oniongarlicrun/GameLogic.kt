@@ -1,12 +1,10 @@
 package com.example.oniongarlicrun
-import android.content.Context
 import android.os.CountDownTimer
 import android.util.Log
 import android.widget.ImageView
 import com.example.oniongarlicrun.utils.Smanager
 
 class GameLogic(
-    private val context: Context,
     private val cellMatrix: Array<Array<ImageView>>,
     private val onEggplantDraw: (lane: Int) -> Unit,
     private val onHeartUpdate: (lives: Int) -> Unit,
@@ -26,7 +24,6 @@ class GameLogic(
     private var isGameOver = false
     private var meterTimer: CountDownTimer? = null
 
-    fun isGameOver(): Boolean = isGameOver
 
     fun startMeterCounter() {
         meterTimer = object : CountDownTimer(Long.MAX_VALUE, 1000) {
@@ -64,6 +61,7 @@ class GameLogic(
             onSound(R.raw.boom)
             cellMatrix[numRows - 1][lane].setImageDrawable(null)
             cellMatrix[numRows - 1][lane].tag = null
+            cellMatrix[numRows - 1][lane].contentDescription = null
         } else if (tag == "coin") {
             coinsCollected++
             onCoinUpdate(coinsCollected)
@@ -71,6 +69,7 @@ class GameLogic(
             onSound(R.raw.coin)
             cellMatrix[numRows - 1][lane].setImageDrawable(null)
             cellMatrix[numRows - 1][lane].tag = null
+            cellMatrix[numRows - 1][lane].contentDescription = null
         }
     }
 
@@ -115,12 +114,15 @@ class GameLogic(
                 if (row > 0 && row - 1 != numRows - 1) {
                     cellMatrix[row - 1][col].setImageDrawable(null)
                     cellMatrix[row - 1][col].tag = null
+                    cellMatrix[row - 1][col].contentDescription = null
+
                 }
 
                 if (row == numRows) {
                     if (col != lane) {
                         cellMatrix[numRows - 1][col].setImageDrawable(null)
                         cellMatrix[numRows - 1][col].tag = null
+                        cellMatrix[numRows - 1][col].contentDescription = null
                     }
                     return
                 }
@@ -137,6 +139,8 @@ class GameLogic(
                 if (cellMatrix[row][col].tag == null) {
                     cellMatrix[row][col].setImageResource(drawableId)
                     cellMatrix[row][col].tag = "bomb"
+                    cellMatrix[row][col].contentDescription = "bomb"
+
                 }
 
 
@@ -147,6 +151,7 @@ class GameLogic(
                 if (col != lane) {
                     cellMatrix[numRows - 1][col].setImageDrawable(null)
                     cellMatrix[numRows - 1][col].tag = null
+                    cellMatrix[numRows - 1][col].contentDescription = null
                 }
             }
         }.start()
@@ -154,6 +159,7 @@ class GameLogic(
 
     private fun spawnCoin() {
         val col = (0 until numCols).random()
+        if (cellMatrix[0][col].tag == "bomb" || cellMatrix[0][col].tag == "coin") return
         val drawableId = R.drawable.coin
         var currentRow = 0
 
@@ -166,12 +172,15 @@ class GameLogic(
                 if (row > 0 && row - 1 != numRows - 1) {
                     cellMatrix[row - 1][col].setImageDrawable(null)
                     cellMatrix[row - 1][col].tag = null
+                    cellMatrix[row - 1][col].contentDescription = null
                 }
 
                 if (row == numRows) {
                     if (col != lane) {
                         cellMatrix[numRows - 1][col].setImageDrawable(null)
                         cellMatrix[numRows - 1][col].tag = null
+                        cellMatrix[numRows - 1][col].contentDescription = null
+
                     }
                     return
                 }
@@ -183,12 +192,15 @@ class GameLogic(
                     onSound(R.raw.coin)
                     cellMatrix[row][col].setImageDrawable(null)
                     cellMatrix[row][col].tag = null
+                    cellMatrix[row][col].contentDescription= null
                     onEggplantDraw(lane)
                     return
                 }
 
                 cellMatrix[row][col].setImageResource(drawableId)
                 cellMatrix[row][col].tag = "coin"
+                cellMatrix[row][col].contentDescription = "coin"
+
 
                 currentRow++
             }
@@ -197,6 +209,7 @@ class GameLogic(
                 if (col != lane) {
                     cellMatrix[numRows - 1][col].setImageDrawable(null)
                     cellMatrix[numRows - 1][col].tag = null
+                    cellMatrix[numRows - 1][col].contentDescription = null
                 }
             }
         }.start()

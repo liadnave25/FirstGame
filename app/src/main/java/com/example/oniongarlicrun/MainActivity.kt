@@ -65,7 +65,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         gameLogic = GameLogic(
-            context = this,
             cellMatrix = cellMatrix,
             onEggplantDraw = { drawEggplantAtLane(it) },
             onHeartUpdate = { updateHearts(it) },

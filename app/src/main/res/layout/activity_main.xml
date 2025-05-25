@@ -21,19 +21,25 @@
             android:id="@+id/heart1"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/heart"/>
+            android:src="@drawable/heart"
+            android:contentDescription="@string/life_icon"
+            />
 
         <ImageView
             android:id="@+id/heart2"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/heart"/>
+            android:src="@drawable/heart"
+            android:contentDescription="@string/life_icon"
+            />
 
         <ImageView
             android:id="@+id/heart3"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/heart"/>
+            android:src="@drawable/heart"
+            android:contentDescription="@string/life_icon"
+            />
     </LinearLayout>
 
     <!-- Meters Counter -->
@@ -41,7 +47,7 @@
         android:id="@+id/metersTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Meters Passed: 0"
+        android:text="@string/meters_passed_initial"
         android:textSize="18sp"
         android:textColor="#000000"
         android:fontFamily="@font/comic_light"
@@ -55,7 +61,7 @@
         android:id="@+id/coinsTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Coins: 0"
+        android:text="@string/coins_initial"
         android:textSize="18sp"
         android:textColor="#000000"
         android:fontFamily="@font/comic_light"
@@ -93,7 +99,7 @@
             android:layout_height="60dp"
             android:src="@drawable/arrowleft"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="left arrow"
+            android:contentDescription="@string/left_arrow_description"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
@@ -103,7 +109,7 @@
             android:layout_height="60dp"
             android:src="@drawable/arrowright"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="right arrow"
+            android:contentDescription="@string/right_arrow_description"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
